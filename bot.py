@@ -202,7 +202,6 @@ async def generate_reply(user_id: int, user_text: str) -> str:
 
     resp = client.responses.create(
         model=OPENAI_MODEL,
-        reasoning={"effort": "low"},
         instructions=SYSTEM_INSTRUCTIONS,
         input=input_text,
     )
