@@ -359,13 +359,22 @@ def main() -> None:
 )
 
 from telegram.error import Conflict
+import asyncio
 
 async def error_handler(update, context):
     err = context.error
     if isinstance(err, Conflict):
-        # Обычно это короткий конфликт при рестарте/деплое.
+        # типично при параллельном деплое/двух инстансах
+        log.warning("Telegram 409 Conflict: another getUpdates is running. Ensure single instance.")
+        # маленькая пауза, чтобы не спамить логами
+        await asyncio.sleep(2)
         return
     log.exception("Unhandled error", exc_info=err)
 
 if __name__ == "__main__":
     main()
+app.add_error_handler(error_handler)
+app.run_polling(
+    allowed_updates=Update.ALL_TYPES,
+    drop_pending_updates=True,
+)
