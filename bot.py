@@ -353,7 +353,19 @@ def main() -> None:
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_text))
 
     log.info("Bot started")
-    app.run_polling(allowed_updates=Update.ALL_TYPES)
+    app.run_polling(
+    allowed_updates=Update.ALL_TYPES,
+    drop_pending_updates=True,
+)
+
+from telegram.error import Conflict
+
+async def error_handler(update, context):
+    err = context.error
+    if isinstance(err, Conflict):
+        # Обычно это короткий конфликт при рестарте/деплое.
+        return
+    log.exception("Unhandled error", exc_info=err)
 
 if __name__ == "__main__":
     main()
